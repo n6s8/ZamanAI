@@ -210,5 +210,69 @@ app.post('/api/spend/pdf', upload.single('file'), async (req: Request, res: Resp
     }
 })
 
+/** === AI-анализ расходов: группировка + привычки === */
+app.post('/api/spend/ai', async (req: Request, res: Response) => {
+    try {
+        const txs = Array.isArray(req.body?.txs) ? req.body.txs : []
+        if (!txs.length) return res.status(400).json({ error: 'no txs' })
+
+        const base = process.env.HUB_BASE_URL || ''
+        const key  = process.env.HUB_API_KEY  || ''
+        if (!base || !key) {
+            return res.status(500).json({ error: 'HUB_BASE_URL or HUB_API_KEY is missing' })
+        }
+
+        const compact = txs.slice(-200).map((t: any) => ({
+            d: String(t.d ?? t.description ?? '').slice(0, 140),
+            a: Number(t.a ?? t.amount ?? 0),
+        }))
+
+        const SYSTEM =
+            'Ты — финансовый аналитик банка. Тебе дан список операций: d — описание, a — сумма (отрицательные — расходы). ' +
+            'Сгруппируй их по категориям (например: "Продукты", "Кафе", "Транспорт", "Подписки", "Коммунальные", "Здоровье", "Переводы", "Другое"). ' +
+            'Верни строго JSON вида: {"categories":[{"name":string,"total":number,"kind":"expense"|"income","examples":string[]}],"habits":string[]}. ' +
+            'categories — топ-10 по расходам и доходам. habits — 5–10 советов, как сократить траты и выработать полезные финансовые привычки.'
+
+        const USER = `Операции: ${JSON.stringify(compact)}`
+
+        const url = `${base}/chat/completions`
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+        if (key.startsWith('sk-')) headers.Authorization = `Bearer ${key}`
+        else headers['x-litellm-api-key'] = key
+
+        const body = {
+            model: 'gpt-4o-mini',
+            temperature: 0.3,
+            response_format: { type: 'json_object' },
+            messages: [
+                { role: 'system', content: SYSTEM },
+                { role: 'user', content: USER }
+            ]
+        }
+
+        const r = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
+        const raw = await r.text()
+
+        if (!r.ok) return res.status(r.status).json({ error: raw })
+
+        let parsed
+        try {
+            const j = JSON.parse(raw)
+            const c = j?.choices?.[0]?.message?.content
+            parsed = typeof c === 'string' ? JSON.parse(c) : c
+        } catch {
+            parsed = JSON.parse(raw)
+        }
+
+        if (!parsed || !Array.isArray(parsed.categories) || !Array.isArray(parsed.habits))
+            return res.status(500).json({ error: 'bad ai json', raw })
+
+        res.json(parsed)
+    } catch (e: any) {
+        res.status(500).json({ error: e?.message ?? 'ai error' })
+    }
+})
+
+
 const PORT = Number(process.env.PORT ?? 5210)
 app.listen(PORT, () => console.log(`✅ Server: http://localhost:${PORT}`))
