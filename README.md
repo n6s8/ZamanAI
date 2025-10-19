@@ -1,73 +1,165 @@
-# React + TypeScript + Vite
+Here’s a full **README.md** describing your project based on `chat.ts` and `SpendAnalyzer.tsx`:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+---
 
-Currently, two official plugins are available:
+# 💳 Zaman Financial Assistant
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+An interactive **personal finance web application** designed to analyze Kaspi (and similar) PDF statements, visualize spending behavior, and provide actionable financial insights based on Islamic banking principles.
+Built for **offline-first analysis**, with optional **AI augmentation** through a backend integration.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🧠 Overview
 
-## Expanding the ESLint configuration
+**Zaman Financial Assistant** allows users to:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+* Upload **Kaspi PDF or CSV statements**
+* Parse and categorize expenses locally (no network required)
+* View **spending analytics** using tables and **interactive pie charts**
+* Receive **habit recommendations** to improve savings
+* Optionally chat with an **AI financial assistant** about income, goals, and budgeting
+* Save and export user profiles and session memory
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## ⚙️ Technical Stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 🖥️ Frontend
+
+* **React + TypeScript** — UI and data management
+* **Hooks (useState, useMemo, useEffect)** — stateful logic
+* **SVG-based charts** — lightweight pie visualization
+* **Local heuristics** — rule-based categorization of spendings
+* **Client-only analysis** — no backend required for offline mode
+
+### 🌐 Backend (`chat.ts`)
+
+* **Node.js + Express**
+* **Multer** — handles PDF file uploads
+* **pdf-parse** — extracts text data from Kaspi PDF statements
+* **dotenv** — manages environment variables
+* **CORS** — allows frontend/backend communication
+* **Fetch API + AbortController** — for AI chat and audio endpoints
+* Optional integration with:
+
+    * **OpenAI / LiteLLM API** (`HUB_BASE_URL` & `HUB_API_KEY`)
+    * Endpoints:
+
+        * `/api/chat` — text-based assistant (GPT-like)
+        * `/api/stt` — speech-to-text via Whisper
+        * `/api/tts` — text-to-speech output
+        * `/api/spend/pdf` — parse PDF transactions
+
+---
+
+## 🧩 Features
+
+### 📂 PDF Parsing
+
+* Reads **Kaspi Bank PDF statements**
+* Extracts:
+
+    * Date
+    * Amount (+/−)
+    * Transaction kind (Purchases, Transfers, etc.)
+    * Description
+* Automatically detects **currency symbol (₸)**
+
+### 📊 Spend Analyzer
+
+* Displays **categorical spending distribution** in a **pie chart**
+* Tabular breakdown of all transactions
+* Smart sorting by category, amount, or date
+* **Offline heuristic categorization**:
+
+    * *Supermarkets → Food & Groceries*
+    * *Bolt / Yandex → Transport*
+    * *Cafes → Dining*
+    * *Utilities → Bills*
+
+### 💡 Habits Section
+
+* Dynamically generated **recommendations** based on spend ratios
+  Example:
+
+    * “You spent 25% on dining — try preparing meals at home.”
+    * “Transportation exceeds 20% — consider public transit.”
+
+### 🧭 Profile Panel
+
+* Editable profile with:
+
+    * Name
+    * City
+    * Age
+    * Monthly income
+    * Personal goals
+* Session memory with export (`.txt`)
+* Benchmark comparison (“Users like you spend 40% on essentials”)
+
+---
+
+## 🛠️ Installation & Local Setup
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/your-username/zaman-finance
+cd zaman-finance
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Install dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+### 3. Set environment variables
+
+Create `.env` in root:
+
+```bash
+HUB_BASE_URL=https://api.openai.com/v1
+HUB_API_KEY=sk-your-key-here
+PORT=3001
+```
+
+### 4. Run backend
+
+```bash
+npm run server
+```
+
+### 5. Run frontend (React)
+
+```bash
+npm run dev
+```
+
+---
+
+## 🔐 Offline Mode vs AI Mode
+
+| Mode        | Source of Insight               | Requires API Key |
+| ----------- | ------------------------------- | ---------------- |
+| **Offline** | Local regex + heuristics        | ❌                |
+| **AI Mode** | `/api/spend/ai` and `/api/chat` | ✅                |
+
+---
+
+## 🧩 Future Enhancements
+
+* AI-driven categorization using Naïve Bayes or BERT embeddings
+* Multi-bank PDF compatibility
+* Personal goal progress tracker
+* Monthly report exports
+
+---
+
+## 🧾 License
+
+MIT — free for personal and academic use.
+
+---
+
+Would you like me to include a short **architecture diagram (text-based)** showing data flow (PDF → Parser → Analyzer → Habits → Profile)?
