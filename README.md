@@ -1,111 +1,73 @@
-Here’s a full **README.md** describing your project based on `chat.ts` and `SpendAnalyzer.tsx`:
 
 ---
 
-# 💳 Zaman Financial Assistant
+# 💳 ZamanAI — Financial Assistant
 
-An interactive **personal finance web application** designed to analyze Kaspi (and similar) PDF statements, visualize spending behavior, and provide actionable financial insights based on Islamic banking principles.
-Built for **offline-first analysis**, with optional **AI augmentation** through a backend integration.
+**ZamanAI** is an intelligent financial assistant that helps users analyze their expenses, discover saving habits, and make better financial decisions.
+It works both **offline (rule-based)** and **online (AI-enhanced)** via GPT-style models.
 
 ---
 
 ## 🧠 Overview
 
-**Zaman Financial Assistant** allows users to:
-
-* Upload **Kaspi PDF or CSV statements**
-* Parse and categorize expenses locally (no network required)
-* View **spending analytics** using tables and **interactive pie charts**
-* Receive **habit recommendations** to improve savings
-* Optionally chat with an **AI financial assistant** about income, goals, and budgeting
-* Save and export user profiles and session memory
+ZamanAI provides tools for understanding spending patterns, identifying overspending areas, and suggesting practical ways to save.
+It can parse **Kaspi Bank PDF/CSV statements**, visualize data, and give recommendations based on Islamic finance principles.
 
 ---
 
 ## ⚙️ Technical Stack
 
-### 🖥️ Frontend
+### Frontend
 
-* **React + TypeScript** — UI and data management
-* **Hooks (useState, useMemo, useEffect)** — stateful logic
-* **SVG-based charts** — lightweight pie visualization
-* **Local heuristics** — rule-based categorization of spendings
-* **Client-only analysis** — no backend required for offline mode
+* **React + TypeScript** — core UI framework
+* **Vite** — lightning-fast bundler and dev server
+* **Hooks (useState, useMemo, useEffect)** — state and computation logic
+* **Local categorization** — regex and keyword-based expense grouping
+* **Chart.js / SVG Pie** — visual analytics
+* **Offline-first design** — no dependency on external APIs
 
-### 🌐 Backend (`chat.ts`)
+### Backend
 
-* **Node.js + Express**
-* **Multer** — handles PDF file uploads
-* **pdf-parse** — extracts text data from Kaspi PDF statements
-* **dotenv** — manages environment variables
-* **CORS** — allows frontend/backend communication
-* **Fetch API + AbortController** — for AI chat and audio endpoints
-* Optional integration with:
+* **Node.js + Express** — REST API
+* **pdf-parse** — extract text from PDF statements
+* **multer** — handle file uploads
+* **dotenv** — manage environment variables
+* **CORS + Fetch** — secure frontend-backend communication
+* **Optional AI endpoints**:
 
-    * **OpenAI / LiteLLM API** (`HUB_BASE_URL` & `HUB_API_KEY`)
-    * Endpoints:
-
-        * `/api/chat` — text-based assistant (GPT-like)
-        * `/api/stt` — speech-to-text via Whisper
-        * `/api/tts` — text-to-speech output
-        * `/api/spend/pdf` — parse PDF transactions
+  * `/api/chat` — financial assistant (GPT)
+  * `/api/stt` — speech-to-text (Whisper)
+  * `/api/tts` — text-to-speech
+  * `/api/spend/pdf` — Kaspi statement parser
 
 ---
 
-## 🧩 Features
+## 💡 Key Features
 
-### 📂 PDF Parsing
+* **Upload Kaspi statements (PDF/CSV)**
+  Extracts transactions, categorizes automatically, and displays totals.
 
-* Reads **Kaspi Bank PDF statements**
-* Extracts:
+* **Expense Analysis**
+  Visualize where money goes using pie charts and summary tables.
 
-    * Date
-    * Amount (+/−)
-    * Transaction kind (Purchases, Transfers, etc.)
-    * Description
-* Automatically detects **currency symbol (₸)**
+* **Habits & Savings Advice**
+  Generates actionable recommendations like “reduce cafe spending” or “opt for home cooking.”
 
-### 📊 Spend Analyzer
+* **Profile Memory**
+  Save user data — name, city, income, goals — and compare with similar users.
 
-* Displays **categorical spending distribution** in a **pie chart**
-* Tabular breakdown of all transactions
-* Smart sorting by category, amount, or date
-* **Offline heuristic categorization**:
-
-    * *Supermarkets → Food & Groceries*
-    * *Bolt / Yandex → Transport*
-    * *Cafes → Dining*
-    * *Utilities → Bills*
-
-### 💡 Habits Section
-
-* Dynamically generated **recommendations** based on spend ratios
-  Example:
-
-    * “You spent 25% on dining — try preparing meals at home.”
-    * “Transportation exceeds 20% — consider public transit.”
-
-### 🧭 Profile Panel
-
-* Editable profile with:
-
-    * Name
-    * City
-    * Age
-    * Monthly income
-    * Personal goals
-* Session memory with export (`.txt`)
-* Benchmark comparison (“Users like you spend 40% on essentials”)
+* **Offline Mode**
+  Works fully offline via local heuristic classification; optional AI mode adds smart context and insights.
 
 ---
 
-## 🛠️ Installation & Local Setup
+## 🚀 Local Setup
 
 ### 1. Clone repository
 
 ```bash
-git clone https://github.com/your-username/zaman-finance
-cd zaman-finance
+git clone https://github.com/n6s8/ZamanAI.git
+cd ZamanAI
 ```
 
 ### 2. Install dependencies
@@ -114,52 +76,45 @@ cd zaman-finance
 npm install
 ```
 
-### 3. Set environment variables
+### 3. Environment setup
 
-Create `.env` in root:
+Create `.env`:
 
 ```bash
+PORT=5210
 HUB_BASE_URL=https://api.openai.com/v1
 HUB_API_KEY=sk-your-key-here
-PORT=3001
+VITE_API_URL=http://localhost:5210
 ```
 
-### 4. Run backend
+### 4. Run servers
 
 ```bash
-npm run server
-```
+# Backend
+npm run dev:server
 
-### 5. Run frontend (React)
-
-```bash
+# Frontend
 npm run dev
 ```
 
----
-
-## 🔐 Offline Mode vs AI Mode
-
-| Mode        | Source of Insight               | Requires API Key |
-| ----------- | ------------------------------- | ---------------- |
-| **Offline** | Local regex + heuristics        | ❌                |
-| **AI Mode** | `/api/spend/ai` and `/api/chat` | ✅                |
+Then open [http://localhost:5179](http://localhost:5179)
 
 ---
 
-## 🧩 Future Enhancements
+## 🧩 Modes
 
-* AI-driven categorization using Naïve Bayes or BERT embeddings
-* Multi-bank PDF compatibility
-* Personal goal progress tracker
-* Monthly report exports
-
----
-
-## 🧾 License
-
-MIT — free for personal and academic use.
+| Mode        | Description                        | Requires Key |
+| ----------- | ---------------------------------- | ------------ |
+| **Offline** | Local parsing & analysis only      | ❌            |
+| **AI Mode** | GPT-based insights via `/api/chat` | ✅            |
 
 ---
 
-Would you like me to include a short **architecture diagram (text-based)** showing data flow (PDF → Parser → Analyzer → Habits → Profile)?
+## 📈 Future Plans
+
+* Machine learning-based categorization (Naïve Bayes / embeddings)
+* Integration with multiple banks
+* Monthly spending reports and trend detection
+* Personal goal tracking
+
+---
